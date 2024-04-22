@@ -18,6 +18,9 @@ class Command:
 
 
 def guess_word(message):
+        """
+        выводим пользователю слово на русском языке и спрашиваем перевод, при помощи random перемешиваем кнопки
+        """
         user_id = message.chat.id
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         global word
@@ -37,6 +40,9 @@ def guess_word(message):
 
 @bot.message_handler(commands=["start"])
 def greeting(message):
+    """
+    приветсвенное сообщение, и маленькая инструкция 
+    """
     msg = (
     f"Привет!👋Давай попрактикуемся в английском языке.\n"
     f"Тренировки можешь проходить в удобном для себя темпе. У\n"
@@ -57,12 +63,18 @@ def greeting(message):
 
 @bot.message_handler(func=lambda message: message.text == Command.GO or message.text == Command.NEXT)
 def pick_word(message):
+    """
+    запускаем функцию вывода слова на русском языке, с вариантами перевода 
+    """
     global word_en
     word_en = guess_word(message)
     bot.register_next_step_handler(message, callback_user)
 
 @bot.callback_query_handler(func=lambda message: True)
 def callback_user(message):
+    """
+    получаем ответ либо команду 
+    """
     if message.text == word_en:
         bot.send_message(message.chat.id, "Верно!")
     elif message.text == Command.NEXT:
@@ -77,11 +89,17 @@ def callback_user(message):
     
 @bot.message_handler(func=lambda message: message.text == Command.ADD_WORD)
 def request_word_add(message):
+    """
+    запрашиваем слово которое пользователь хочет добавить в 'свою' таблицу бд
+    """
     bot.send_message(message.chat.id, f"Введите слово")
     bot.register_next_step_handler(message, added_user_word)
     
 @bot.callback_query_handler(func=lambda message: True)
 def added_user_word(message):
+    """
+    вызываем функцию added_word в которую передаем id и слово введеное пользователем
+    """
     added_word(id_user=message.chat.id, word=message.text)
     bot.send_message(message.chat.id, f"Слово {message.text} успешно добавлено")
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -97,6 +115,9 @@ def request_word_del(message):
 
 @bot.callback_query_handler(func=lambda message: True)
 def del_user_word(message):
+    """
+    вызываем функцию delete_word в которую передаем id и слово которое пользователь собирается удалить из 'своей' таблицы
+    """
     delete_word(id_user=message.chat.id, word=message.text)
     bot.send_message(message.chat.id, f"Слово {message.text} успешно удалено")
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
